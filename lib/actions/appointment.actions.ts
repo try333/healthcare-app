@@ -32,81 +32,93 @@ export const createAppointment = async (
   }
 };
 
-export const getAppointment = async (appointmentId: string) => {
-  try {
-    const appointment = await databases.getDocument(
-      DATABASE_ID!,
-      APPOINTMENT_COLLECTION_ID!,
-      appointmentId,
-    )
-
-    return parseStringify(appointment);
-  } catch (error) {
-    console.log(error)
-  }
-}
-
+//  GET RECENT APPOINTMENTS
 export const getRecentAppointmentList = async () => {
   try {
     const appointments = await databases.listDocuments(
       DATABASE_ID!,
       APPOINTMENT_COLLECTION_ID!,
-      [Query.orderDesc('$createdAt')]
+      [Query.orderDesc("$createdAt")]
     );
 
     const initialCounts = {
       scheduledCount: 0,
       pendingCount: 0,
       cancelledCount: 0,
-    }
+    };
 
-    const counts = (appointments.documents as Appointment[]).reduce((acc, appointment) => {
-      if (appointment.status === 'scheduled') {
-        acc.scheduledCount += 1;
-      }
-      else if (appointment.status === 'pending') {
-        acc.pendingCount += 1;
-      }
-      else if (appointment.status === 'cancelled') {
-        acc.cancelledCount += 1;
-      }
-
-      return acc;
-    }, initialCounts);
+    const counts = (appointments.documents as Appointment[]).reduce(
+      (acc, appointment) => {
+        switch (appointment.status) {
+          case "scheduled":
+            acc.scheduledCount++;
+            break;
+          case "pending":
+            acc.pendingCount++;
+            break;
+          case "cancelled":
+            acc.cancelledCount++;
+            break;
+        }
+        return acc;
+      },
+      initialCounts
+    );
 
     const data = {
       totalCount: appointments.total,
       ...counts,
-      documents: appointments.documents
-    }
+      documents: appointments.documents,
+    };
 
     return parseStringify(data);
-
   } catch (error) {
-    console.log(error)
+    console.error(
+      "An error occurred while retrieving the recent appointments:",
+      error
+    );
   }
-}
+};
 
-export const updateAppointment = async ({ appointmentId, userId, appointment, type }: UpdateAppointmentParams) => {
+//  UPDATE APPOINTMENT
+export const updateAppointment = async ({
+  appointmentId,
+  userId,
+  appointment,
+  type,
+}: UpdateAppointmentParams) => {
   try {
+    // Update appointment to scheduled -> https://appwrite.io/docs/references/cloud/server-nodejs/databases#updateDocument
     const updatedAppointment = await databases.updateDocument(
       DATABASE_ID!,
       APPOINTMENT_COLLECTION_ID!,
       appointmentId,
       appointment
-    )
+    );
 
-    if (!updatedAppointment) {
-      throw new Error("Appointment not found");
+    if (!updatedAppointment) throw Error;
 
-    }
-
-    //TODO SMS NOTIFICATION
-
-    revalidatePath('admin');
+    revalidatePath("/admin");
     return parseStringify(updatedAppointment);
-
   } catch (error) {
-    console.log(error)
+    console.error("An error occurred while scheduling an appointment:", error);
   }
-}
+};
+
+// GET APPOINTMENT
+export const getAppointment = async (appointmentId: string) => {
+  try {
+    const appointment = await databases.getDocument(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      appointmentId
+    );
+
+    return parseStringify(appointment);
+  } catch (error) {
+    console.error(
+      "An error occurred while retrieving the existing patient:",
+      error
+    );
+  }
+};

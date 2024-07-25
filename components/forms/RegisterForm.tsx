@@ -94,7 +94,7 @@ export const RegisterForm = ({ user }: { user: User }) => {
         router.push(`/patients/${user.$id}/new-appointment`);
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       setIsLoading(false);
     }
 

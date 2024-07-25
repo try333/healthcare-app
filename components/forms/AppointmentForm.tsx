@@ -32,9 +32,9 @@ export const AppointmentForm = ({
 }: {
     userId: string;
     patientId: string;
-    type: "create" | "schedule" | "cancel";
+    type: "create" | "cancel" | "schedule";
     appointment?: Appointment;
-    setOpen?: Dispatch<SetStateAction<boolean>>;
+    setOpen: (open: boolean) => void;
 }) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
@@ -87,7 +87,7 @@ export const AppointmentForm = ({
                 const newAppointment = await createAppointment(appointment);
 
                 if (newAppointment) {
-                    console.log("tes", type)
+                    // console.log("tes", type)
                     form.reset();
                     router.push(
                         `/patients/${userId}/new-appointment/success?appointmentId=${newAppointment.$id}`
