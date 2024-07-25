@@ -1,12 +1,12 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import React from 'react'
-import { RegisterForm } from '@/components/forms/RegisterForm'
-import { getUser } from '@/lib/actions/patient.actions'
+import { AppointmentForm } from "@/components/forms/AppointmentForm";
+import { PatientForm } from "@/components/forms/PatientForm";
+import { Button } from "@/components/ui/button";
+import { getPatient } from "@/lib/actions/patient.actions";
+import Image from "next/image";
+import Link from "next/link";
 
-const Register = async({ params: { userId } }: SearchParamProps) => {
-    const user = await getUser(userId);
-
+export default async function NewAppointment({ params: { userId } }: SearchParamProps) {
+    const patient = await getPatient(userId);
     return (
         <div className="flex h-screen max-h-screen">
 
@@ -20,7 +20,11 @@ const Register = async({ params: { userId } }: SearchParamProps) => {
                         className="mb-12 h-28 w-fit"
                     />
 
-                    <RegisterForm user={user}/>
+                    <AppointmentForm
+                        patientId={patient?.$id}
+                        userId={userId}
+                        type="create"
+                    />
 
                     <div className="text-14-regular mt-20 flex justify-between">
                         <p className="copyright py-12">
@@ -32,15 +36,14 @@ const Register = async({ params: { userId } }: SearchParamProps) => {
 
             <div className="items-center justify-center">
                 <Image
-                    src="/assets/images/register-img.png"
+                    src="/assets/images/appointment-img.png"
                     height={1000}
                     width={1000}
-                    alt="patient"
+                    alt="appointment"
                     className="side-img max-w-[390px]"
                 />
             </div>
         </div>
+
     )
 }
-
-export default Register

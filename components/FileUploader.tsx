@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Import the Alert component
 
 import { convertFileToUrl } from "@/lib/utils";
+import { AlertCircle } from "lucide-react";
 
 type FileUploaderProps = {
   files: File[] | undefined;
@@ -12,15 +14,36 @@ type FileUploaderProps = {
 };
 
 export const FileUploader = ({ files, onChange }: FileUploaderProps) => {
+  const [error, setError] = useState<string | null>(null);
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    onChange(acceptedFiles);
-  }, []);
+    const imageTypes = ["image/jpeg", "image/png", "image/gif", "image/svg+xml"];
+    const isValid = acceptedFiles.every(file => imageTypes.includes(file.type));
+
+    if (isValid) {
+      setError(null);
+      onChange(acceptedFiles);
+    } else {
+      setError("Only image files (SVG, PNG, JPG, GIF) are allowed.");
+    }
+  }, [onChange]);
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
-    <div {...getRootProps()} className="file-upload">
+<>
+{error && (
+  <Alert variant="destructive" className="text-red-500 border-red-500">
+    <AlertCircle className="h-4 w-4" />
+    <AlertTitle>Error</AlertTitle>
+    <AlertDescription>
+      {error}
+    </AlertDescription>
+  </Alert>
+)}
+<div {...getRootProps()} className="file-upload">
       <input {...getInputProps()} />
+
       {files && files?.length > 0 ? (
         <Image
           src={convertFileToUrl(files[0])}
@@ -49,5 +72,7 @@ export const FileUploader = ({ files, onChange }: FileUploaderProps) => {
         </>
       )}
     </div>
+</>
+    
   );
 };
