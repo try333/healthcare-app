@@ -1,10 +1,12 @@
 "use client";
 
+import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import ReCAPTCHA from "react-google-recaptcha";
 
 import { Form } from "@/components/ui/form";
 import { createUser } from "@/lib/actions/patient.actions";
@@ -16,7 +18,9 @@ import SubmitButton from "../SubmitButton";
 
 export const PatientForm = () => {
   const router = useRouter();
+  const recaptchaRef :any = React.createRef();
   const [isLoading, setIsLoading] = useState(false);
+  const [isRecaptchaChecked, setIsRecaptchaChecked] = useState(false);
 
   const form = useForm<z.infer<typeof UserFormValidation>>({
     resolver: zodResolver(UserFormValidation),
@@ -28,27 +32,41 @@ export const PatientForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof UserFormValidation>) => {
-    setIsLoading(true);
+    if(isRecaptchaChecked){
 
-    try {
-      const user = {
-        name: values.name,
-        email: values.email,
-        phone: values.phone,
-      };
-
-      const newUser = await createUser(user);
-
-      if (newUser) {
-        router.push(`/patients/${newUser.$id}/register`);
+      setIsLoading(true);
+  
+      try {
+        const user = {
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+        };
+  
+        const newUser = await createUser(user);
+  
+        if (newUser) {
+          router.push(`/patients/${newUser.$id}/register`);
+        }
+      } catch (error) {
+        // console.log(error);
+        setIsLoading(false);
       }
-    } catch (error) {
-      // console.log(error);
-      setIsLoading(false);
+  
+      // setIsLoading(false);
     }
-
-    // setIsLoading(false);
   };
+
+  const onChange = () => {
+    // on captcha change
+    console.log(recaptchaRef)
+    setIsRecaptchaChecked(true);
+  }
+
+  const asyncScriptOnLoad = () => {
+    console.log('Google recaptcha loaded just fine')
+    console.log(recaptchaRef)
+  }
 
   return (
     <Form {...form}>
@@ -85,7 +103,14 @@ export const PatientForm = () => {
           label="Phone number"
           placeholder="(555) 123-4567"
         />
-
+        <ReCAPTCHA
+        ref={recaptchaRef}
+        // size="invisible"
+        sitekey="6LekUxkqAAAAAGLIbamHeCb0tr-FQ-2fwF-kH76E"
+        onChange={onChange}
+        asyncScriptOnLoad={asyncScriptOnLoad}
+      />
+        
         <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
       </form>
     </Form>

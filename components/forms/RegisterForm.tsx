@@ -3,9 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import ReCAPTCHA from "react-google-recaptcha";
 
 import { Form, FormControl } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
@@ -28,7 +29,9 @@ import SubmitButton from "../SubmitButton";
 
 export const RegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
+  const recaptchaRef :any = React.createRef();
   const [isLoading, setIsLoading] = useState(false);
+  const [isRecaptchaChecked, setIsRecaptchaChecked] = useState(false);
 
   const form = useForm<z.infer<typeof PatientFormValidation>>({
     resolver: zodResolver(PatientFormValidation),
@@ -41,6 +44,7 @@ export const RegisterForm = ({ user }: { user: User }) => {
   });
 
   const onSubmit = async (values: z.infer<typeof PatientFormValidation>) => {
+    if(isRecaptchaChecked){
     setIsLoading(true);
 
     // Store file info in form data as
@@ -99,7 +103,19 @@ export const RegisterForm = ({ user }: { user: User }) => {
     }
 
     // setIsLoading(false);
+  }
   };
+
+  const onChange = () => {
+    // on captcha change
+    console.log(recaptchaRef)
+    setIsRecaptchaChecked(true);
+  }
+
+  const asyncScriptOnLoad = () => {
+    console.log('Google recaptcha loaded just fine')
+    console.log(recaptchaRef)
+  }
 
   return (
     <Form {...form}>
@@ -378,6 +394,14 @@ export const RegisterForm = ({ user }: { user: User }) => {
             privacy policy"
           />
         </section>
+
+        <ReCAPTCHA
+        ref={recaptchaRef}
+        size="normal"
+        sitekey="6LekUxkqAAAAAGLIbamHeCb0tr-FQ-2fwF-kH76E"
+        onChange={onChange}
+        asyncScriptOnLoad={asyncScriptOnLoad}
+      />
 
         <SubmitButton isLoading={isLoading}>Submit and Continue</SubmitButton>
       </form>
