@@ -11,7 +11,7 @@ export default function Home({ searchParams }: SearchParamProps) {
     <div className="flex h-screen">
       {isAdmin && <PasskeyModal />}
 
-      <section className="remove-scrollbar container flex-1 flex flex-col justify-between mb-10">
+      <section className="remove-scrollbar container flex-1 flex flex-col justify-between">
         <div className="sub-container max-w-[496px] mx-auto my-auto">
           <Image
             src="/assets/icons/logo-medical.png"
@@ -26,14 +26,14 @@ export default function Home({ searchParams }: SearchParamProps) {
             <p className="text-dark-600 xl:text-left">
               © 2024 Medical Clinic
             </p>
-            <Link href="/?admin=true" className="text-green-500">
+            <Link href="/?admin=true" className="text-green-500 mb-10">
               Admin
             </Link>
           </div>
         </div>
       </section>
 
-      <div className="flex-1 flex items-center justify-center">
+      <div className="items-center justify-center hidden lg:flex w-1/2">
         <Image
           src="/assets/images/onboarding-img.png"
           height={1000}
